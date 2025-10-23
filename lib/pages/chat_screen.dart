@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import '../models/message.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_dimensions.dart';
+import '../models/message_model.dart';
+import '../widgets/chat_app_bar.dart';
 import '../widgets/message_bubble.dart';
-import '../widgets/empty_chat_state.dart';
-import '../widgets/model_selector_dropdown.dart';
+import '../widgets/popular_topics_section.dart';
+import '../widgets/message_input_field.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialMessage;
+  final String? selectedModel;
 
-  const ChatScreen({Key? key, this.initialMessage}) : super(key: key);
+  const ChatScreen({Key? key, this.initialMessage, this.selectedModel})
+    : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -18,50 +19,44 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-  String selectedModel = 'Compliance';
-  final List<String> availableModels = ['Compliance', 'Shariaa'];
-
-  List<Message> messages = [];
+  late String selectedModel;
+  List<MessageModel> messages = [];
 
   @override
   void initState() {
     super.initState();
+    selectedModel = widget.selectedModel ?? 'Compliance';
+
     if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
-      _handleInitialMessage();
+      messages.add(MessageModel(text: widget.initialMessage!, isUser: true));
+      messages.add(MessageModel(text: '', isUser: false, isThinking: true));
+
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            messages.removeLast();
+            messages.add(
+              MessageModel(
+                text:
+                    'Thank you for your message! I\'m here to help you with $selectedModel-related questions. How can I assist you further?',
+                isUser: false,
+              ),
+            );
+          });
+          _scrollToBottom();
+        }
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     }
   }
 
-  void _handleInitialMessage() {
-    messages.add(Message(text: widget.initialMessage!, isUser: true));
-    messages.add(Message(text: '', isUser: false, isThinking: true));
-
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          messages.removeLast();
-          messages.add(
-            Message(
-              text:
-                  'Thank you for your message! I\'m here to help you with '
-                  'compliance-related questions. How can I assist you further?',
-              isUser: false,
-            ),
-          );
-        });
-        _scrollToBottom();
-      }
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-  }
-
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+  void _sendMessage(String text) {
+    if (text.trim().isEmpty) return;
 
     setState(() {
-      messages.add(Message(text: _messageController.text, isUser: true));
-      messages.add(Message(text: '', isUser: false, isThinking: true));
+      messages.add(MessageModel(text: text.trim(), isUser: true));
+      messages.add(MessageModel(text: '', isUser: false, isThinking: true));
     });
 
     _messageController.clear();
@@ -72,10 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
         setState(() {
           messages.removeLast();
           messages.add(
-            Message(
+            MessageModel(
               text:
-                  'I understand your query. Let me help you with that based '
-                  'on the $selectedModel guidelines.',
+                  'I understand your query. Let me help you with that based on the $selectedModel guidelines.',
               isUser: false,
             ),
           );
@@ -100,113 +94,83 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          if (messages.isEmpty)
-            Expanded(
-              child: EmptyChatState(
-                subtitle: 'Ask me anything about $selectedModel',
-              ),
-            )
-          else
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.paddingMedium,
-                  vertical: AppDimensions.paddingMedium,
-                ),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[index];
-                  return MessageBubble(
-                    message: message,
-                    selectedModel: selectedModel,
-                  );
-                },
-              ),
-            ),
-          _buildInputSection(),
-        ],
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      title: ModelSelectorDropdown(
+      backgroundColor: Colors.white,
+      appBar: ChatAppBar(
         selectedModel: selectedModel,
-        models: availableModels,
-        onModelSelected: (String newValue) {
+        onModelChanged: (newModel) {
           setState(() {
-            selectedModel = newValue;
+            selectedModel = newModel;
           });
         },
       ),
-      centerTitle: true,
-    );
-  }
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : MediaQuery.of(context).size.width;
+          final height = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : MediaQuery.of(context).size.height;
 
-  Widget _buildInputSection() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, -1),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.inputBackground,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusXLarge),
-              ),
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: 'Type a message...',
-                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
+          double horizontalPadding(double factor) => width * factor;
+          double verticalPadding(double factor) => height * factor;
+
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 900),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: messages.isEmpty
+                        ? const SizedBox.shrink()
+                        : ListView.builder(
+                            controller: _scrollController,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding(0.04),
+                              vertical: verticalPadding(0.015),
+                            ),
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) {
+                              final message = messages[index];
+                              return MessageBubble(
+                                message: message,
+                                selectedModel: selectedModel,
+                              );
+                            },
+                          ),
                   ),
-                ),
-                onSubmitted: (_) => _sendMessage(),
+
+                  if (messages.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(),
+                      child: PopularTopicsSection(onTopicTap: _sendMessage),
+                    ),
+
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: horizontalPadding(0.03),
+                        right: horizontalPadding(0.03),
+                        bottom: verticalPadding(0.01),
+                      ),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: height * 0.18,
+                          minHeight: height * 0.06,
+                        ),
+                        child: MessageInput(
+                          controller: _messageController,
+                          onSend: () => _sendMessage(_messageController.text),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: AppDimensions.buttonCircle,
-            height: AppDimensions.buttonCircle,
-            decoration: const BoxDecoration(
-              color: AppColors.sendButton,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.send, color: AppColors.white, size: 18),
-              onPressed: _sendMessage,
-              padding: EdgeInsets.zero,
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

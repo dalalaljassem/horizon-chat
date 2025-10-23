@@ -1,64 +1,91 @@
 import 'package:flutter/material.dart';
-import '../constants/app_dimensions.dart';
-import '../constants/app_colors.dart';
+import 'dart:ui';
 
 class TopicCard extends StatelessWidget {
-  final IconData icon;
   final String text;
-  final Color color;
+  final IconData icon;
+  final Color iconColor;
   final VoidCallback onTap;
-  final double? width;
-  final double? iconSize;
 
   const TopicCard({
     Key? key,
-    required this.icon,
     required this.text,
-    required this.color,
+    required this.icon,
+    required this.iconColor,
     required this.onTap,
-    this.width,
-    this.iconSize,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: width ?? AppDimensions.topicCardWidth,
-        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-        decoration: BoxDecoration(
-          color: AppColors.white.withOpacity(0.7),
-          borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: AppDimensions.topicIconSize,
-              height: AppDimensions.topicIconSize,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: color,
-                size: iconSize ?? AppDimensions.iconMedium,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final screenHeight = MediaQuery.of(context).size.height;
+        final cardWidth = screenWidth * 0.4;
+        final cardHeight = screenHeight * 0.15;
+
+        return GestureDetector(
+          onTap: onTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(screenWidth * 0.035),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                width: cardWidth,
+                height: cardHeight,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(screenWidth * 0.035),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(screenWidth * 0.03),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: screenWidth * 0.1,
+                        height: screenWidth * 0.1,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFCBCBCB).withOpacity(0.48),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFCBCBCB).withOpacity(0.3),
+                              const Color(0xFFCBCBCB).withOpacity(0.5),
+                            ],
+                          ),
+                        ),
+                        child: Icon(
+                          icon,
+                          size: screenWidth * 0.05,
+                          color: iconColor,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        text,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.037,
+                          color: const Color(0xFF6C6C70),
+                          height: 1.25,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            const Spacer(),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textTertiary,
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

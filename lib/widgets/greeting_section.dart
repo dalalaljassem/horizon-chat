@@ -8,11 +8,11 @@ class GreetingSection extends StatelessWidget {
   final String subtitle;
 
   const GreetingSection({
-    Key? key,
+    super.key,
     required this.userName,
     this.greeting = 'How can i help you?',
     this.subtitle = 'Your smart assistant is here',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

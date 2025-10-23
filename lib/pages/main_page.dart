@@ -1,6 +1,6 @@
+// pages/main_page.dart
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import 'chat_overlay_page.dart';
+import 'chat_selection_page.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -8,14 +8,14 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.mainBackground,
+      backgroundColor: const Color(0xFFF6F6F6),
       body: GestureDetector(
         onVerticalDragUpdate: (details) {
           if (details.delta.dy > 10) {
             Navigator.of(context).push(
               PageRouteBuilder(
                 transitionDuration: const Duration(milliseconds: 400),
-                pageBuilder: (_, __, ___) => const ChatOverlayPage(),
+                pageBuilder: (_, __, ___) => const ChatSelectionPage(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
                       return SlideTransition(

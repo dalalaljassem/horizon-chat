@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_styles.dart';
-import 'sparkle_icon_painter.dart';
 
 class AiAvatar extends StatelessWidget {
   final double size;
   final double iconSize;
   final Color? backgroundColor;
+  final String svgAsset;
 
   const AiAvatar({
-    Key? key,
+    super.key,
     this.size = 36,
     this.iconSize = 18,
     this.backgroundColor,
-  }) : super(key: key);
+    required this.svgAsset,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +28,11 @@ class AiAvatar extends StatelessWidget {
         boxShadow: AppStyles.avatarShadow,
       ),
       child: Center(
-        child: CustomPaint(
-          size: Size(iconSize, iconSize),
-          painter: SparkleIconPainter(),
+        child: SvgPicture.asset(
+          svgAsset,
+          width: iconSize,
+          height: iconSize,
+          fit: BoxFit.contain,
         ),
       ),
     );

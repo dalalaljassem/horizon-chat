@@ -1,76 +1,116 @@
 import 'package:flutter/material.dart';
-import '../models/message.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_dimensions.dart';
-import '../constants/app_styles.dart';
+import '../models/message_model.dart';
+import 'sparkle_icon_painter.dart';
 import 'ai_avatar.dart';
 
 class MessageBubble extends StatelessWidget {
-  final Message message;
-  final String? selectedModel;
+  final MessageModel message;
+  final String selectedModel;
 
-  const MessageBubble({Key? key, required this.message, this.selectedModel})
-    : super(key: key);
+  const MessageBubble({
+    Key? key,
+    required this.message,
+    required this.selectedModel,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (message.isUser) {
-      return _buildUserMessage(context);
-    } else {
-      return _buildAiMessage();
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        if (message.isUser) {
+          return _buildUserMessage(width);
+        } else {
+          return _buildAiMessage(width);
+        }
+      },
+    );
   }
 
-  Widget _buildUserMessage(BuildContext context) {
+  Widget _buildUserMessage(double width) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: width * 0.04),
       child: Align(
         alignment: Alignment.centerRight,
         child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.75,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.paddingMedium,
-            vertical: 12,
+          constraints: BoxConstraints(maxWidth: width * 0.75),
+          padding: EdgeInsets.symmetric(
+            horizontal: width * 0.04,
+            vertical: width * 0.03,
           ),
           decoration: BoxDecoration(
-            color: AppColors.messageBubbleUser,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(width * 0.05),
           ),
-          child: Text(message.text, style: AppStyles.bodyLarge),
+          child: Text(
+            message.text,
+            style: TextStyle(fontSize: width * 0.042, color: Colors.black),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildAiMessage() {
+  Widget _buildAiMessage(double width) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: width * 0.04),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AiAvatar(
-            size: AppDimensions.avatarSmall,
-            iconSize: AppDimensions.iconSmall,
+          Container(
+            width: width * 0.085,
+            height: width * 0.085,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8EEF7),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: AiAvatar(
+                size: 50,
+                iconSize: 50,
+                svgAsset: 'assets/fonts/Inter/icons/sparkle_icon.svg',
+              ),
+            ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: width * 0.03),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ai Assistant${selectedModel != null ? ' ($selectedModel)' : ''}',
-                  style: AppStyles.aiAssistantLabel,
+                  'Ai Assistant ($selectedModel)',
+                  style: TextStyle(
+                    fontSize: width * 0.037,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: width * 0.02),
                 if (message.isThinking)
-                  const Text(
+                  Text(
                     'Thinking ...',
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    style: TextStyle(
+                      fontSize: width * 0.042,
+                      color: Colors.black54,
+                    ),
                   )
                 else
-                  Text(message.text, style: AppStyles.messageText),
+                  Text(
+                    message.text,
+                    style: TextStyle(
+                      fontSize: width * 0.042,
+                      color: Colors.black87,
+                      height: 1.5,
+                    ),
+                  ),
               ],
             ),
           ),

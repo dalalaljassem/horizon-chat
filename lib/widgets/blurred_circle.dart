@@ -9,13 +9,13 @@ class BlurredCircle extends StatelessWidget {
   final double sigmaY;
 
   const BlurredCircle({
-    Key? key,
+    super.key,
     required this.size,
     required this.color,
     this.opacity = 0.6,
     this.sigmaX = 80,
     this.sigmaY = 80,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

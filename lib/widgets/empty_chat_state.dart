@@ -1,34 +1,44 @@
 import 'package:flutter/material.dart';
-import '../constants/app_dimensions.dart';
-import '../constants/app_styles.dart';
-import 'ai_avatar.dart';
+import 'sparkle_icon_painter.dart';
 
 class EmptyChatState extends StatelessWidget {
-  final String title;
-  final String subtitle;
+  final String selectedModel;
 
-  const EmptyChatState({
-    Key? key,
-    this.title = 'Start a conversation',
-    required this.subtitle,
-  }) : super(key: key);
+  const EmptyChatState({Key? key, required this.selectedModel})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const AiAvatar(
-            size: AppDimensions.avatarLarge,
-            iconSize: AppDimensions.iconLarge,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final height = constraints.maxHeight;
+
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: height * 0.025),
+              Text(
+                'Start a conversation',
+                style: TextStyle(
+                  fontSize: width * 0.053,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+              SizedBox(height: height * 0.01),
+              Text(
+                'Ask me anything about $selectedModel',
+                style: TextStyle(
+                  fontSize: width * 0.037,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(title, style: AppStyles.headingSmall),
-          const SizedBox(height: 8),
-          Text(subtitle, style: AppStyles.bodySmall),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
 
 class SparkleIconPainter extends CustomPainter {
-  final Color color;
-
-  SparkleIconPainter({this.color = AppColors.sparkleBlue});
-
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color
+      ..color = const Color(0xFF4F7CFF)
       ..style = PaintingStyle.fill;
 
     final centerX = size.width / 2;
@@ -46,6 +41,7 @@ class SparkleIconPainter extends CustomPainter {
     double size,
   ) {
     final path = Path();
+
     path.moveTo(center.dx, center.dy - size / 2);
     path.quadraticBezierTo(
       center.dx + size * 0.05,
@@ -53,24 +49,28 @@ class SparkleIconPainter extends CustomPainter {
       center.dx + size / 2,
       center.dy,
     );
+
     path.quadraticBezierTo(
       center.dx + size * 0.05,
       center.dy + size * 0.05,
       center.dx,
       center.dy + size / 2,
     );
+
     path.quadraticBezierTo(
       center.dx - size * 0.05,
       center.dy + size * 0.05,
       center.dx - size / 2,
       center.dy,
     );
+
     path.quadraticBezierTo(
       center.dx - size * 0.05,
       center.dy - size * 0.05,
       center.dx,
       center.dy - size / 2,
     );
+
     path.close();
     canvas.drawPath(path, paint);
   }
